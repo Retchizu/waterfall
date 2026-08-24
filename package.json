@@ -6,6 +6,11 @@
     "dev": "npm --prefix web run dev",
     "build": "npm --prefix web run build",
     "start": "npm --prefix web run start",
-    "lint": "npm --prefix web run lint"
+    "lint": "npm --prefix web run lint",
+    "supabase:start": "npx supabase start",
+    "supabase:stop": "npx supabase stop",
+    "db:reset": "npx supabase db reset",
+    "db:push": "npx supabase db push",
+    "db:new": "npx supabase migration new"
   }
 }
