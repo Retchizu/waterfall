@@ -37,11 +37,13 @@ function formatDate(value: string) {
 
 type ProjectsWorkspaceProps = {
 	initialProjects: Project[];
+	issueCounts: Record<string, number>;
 	loadError?: string;
 };
 
 export function ProjectsWorkspace({
 	initialProjects,
+	issueCounts,
 	loadError,
 }: ProjectsWorkspaceProps) {
 	const router = useRouter();
@@ -174,7 +176,7 @@ export function ProjectsWorkspace({
 							<div className="mt-4 flex justify-end gap-2"><Button disabled={isSaving} onClick={() => setEditingId(null)} type="button" variant="outline">Cancel</Button><Button disabled={isSaving} type="submit">{isSaving ? "Saving…" : "Save changes"}</Button></div>
 						</form> : <>
 							<div className="flex flex-col gap-4 sm:flex-row sm:justify-between"><div><div className="flex items-center gap-2"><span className="rounded-md bg-sky-50 px-2 py-1 text-xs font-bold tracking-wide text-sky-700">{project.key}</span><h2 className="font-semibold text-slate-950">{project.name}</h2></div><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">{project.description || "No description provided."}</p></div><div className="flex shrink-0 items-start gap-2"><Button aria-label={`Update ${project.name}`} onClick={() => { setEditingId(project.id); setEditForm(toProjectForm(project)); setMessage(null); }} size="sm" variant="outline"><Edit3 />Update</Button><Button aria-label={`Delete ${project.name}`} onClick={() => { setDeleteProject(project); setDeleteName(""); setMessage(null); }} size="sm" variant="destructive"><Trash2 />Delete</Button></div></div>
-							<div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-slate-100 pt-4 text-xs text-slate-500"><span>{project.issue_counter} {project.issue_counter === 1 ? "issue" : "issues"}</span><span>Created {formatDate(project.created_at)}</span><span>Updated {formatDate(project.updated_at)}</span></div>
+							<div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-slate-100 pt-4 text-xs text-slate-500"><span>{issueCounts[project.id] ?? 0} {(issueCounts[project.id] ?? 0) === 1 ? "issue" : "issues"}</span><span>Created {formatDate(project.created_at)}</span><span>Updated {formatDate(project.updated_at)}</span></div>
 						</>}
 					</article>
 				))}</div>}

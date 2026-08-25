@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
 	public: {
 		Tables: {
+			issue_statuses: {
+				Row: {
+					created_at: string;
+					id: string;
+					is_complete: boolean;
+					name: string;
+					position: number;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					is_complete?: boolean;
+					name: string;
+					position: number;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					is_complete?: boolean;
+					name?: string;
+					position?: number;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [];
+			};
 			projects: {
 				Row: {
 					created_at: string;
@@ -52,7 +82,7 @@ export type Database = {
 					number: number;
 					priority: number;
 					project_id: string;
-					status: "backlog" | "in_progress" | "done";
+					status_id: string;
 					updated_at: string;
 				};
 				Insert: {
@@ -64,7 +94,7 @@ export type Database = {
 					number: number;
 					priority?: number;
 					project_id: string;
-					status?: "backlog" | "in_progress" | "done";
+					status_id: string;
 					updated_at?: string;
 				};
 				Update: {
@@ -76,7 +106,7 @@ export type Database = {
 					number?: number;
 					priority?: number;
 					project_id?: string;
-					status?: "backlog" | "in_progress" | "done";
+					status_id?: string;
 					updated_at?: string;
 				};
 				Relationships: [
@@ -87,14 +117,69 @@ export type Database = {
 						referencedRelation: "projects";
 						referencedColumns: ["id"];
 					},
+					{
+						foreignKeyName: "issues_status_id_fkey";
+						columns: ["status_id"];
+						isOneToOne: false;
+						referencedRelation: "issue_statuses";
+						referencedColumns: ["id"];
+					},
 				];
 			};
 		};
 		Views: Record<string, never>;
-		Functions: Record<string, never>;
+		Functions: {
+			add_issue_status: {
+				Args: { p_name: string };
+				Returns: Database["public"]["Tables"]["issue_statuses"]["Row"];
+			};
+			create_issue: {
+				Args: {
+					p_description?: string | null;
+					p_name: string;
+					p_priority?: number;
+					p_project_id: string;
+					p_status_id?: string | null;
+				};
+				Returns: Database["public"]["Tables"]["issues"]["Row"];
+			};
+			delete_issue_status: {
+				Args: { p_replacement_status_id?: string | null; p_status_id: string };
+				Returns: undefined;
+			};
+			ensure_issue_statuses: {
+				Args: Record<PropertyKey, never>;
+				Returns: Database["public"]["Tables"]["issue_statuses"]["Row"][];
+			};
+			rename_issue_status: {
+				Args: { p_name: string; p_status_id: string };
+				Returns: Database["public"]["Tables"]["issue_statuses"]["Row"];
+			};
+			reorder_issue_statuses: {
+				Args: { p_status_ids: string[] };
+				Returns: Database["public"]["Tables"]["issue_statuses"]["Row"][];
+			};
+			set_complete_issue_status: {
+				Args: { p_status_id: string };
+				Returns: Database["public"]["Tables"]["issue_statuses"]["Row"];
+			};
+			update_issue: {
+				Args: {
+					p_description?: string | null;
+					p_issue_id: string;
+					p_name: string;
+					p_priority?: number;
+					p_project_id: string;
+					p_status_id?: string | null;
+				};
+				Returns: Database["public"]["Tables"]["issues"]["Row"];
+			};
+		};
 		Enums: Record<string, never>;
 		CompositeTypes: Record<string, never>;
 	};
 };
 
 export type Project = Database["public"]["Tables"]["projects"]["Row"];
+export type Issue = Database["public"]["Tables"]["issues"]["Row"];
+export type IssueStatus = Database["public"]["Tables"]["issue_statuses"]["Row"];

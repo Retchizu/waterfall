@@ -1,13 +1,12 @@
-export default function IssuesPage() {
-	return (
-		<section className="p-6 sm:p-8">
-			<p className="text-sm font-medium text-sky-600">Workspace</p>
-			<h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">
-				Issues
-			</h1>
-			<p className="mt-2 text-slate-500">
-				Track and resolve the work that keeps your projects moving.
-			</p>
-		</section>
-	);
+import { IssuesWorkspace } from "@/components/issues-workspace";
+import { createClient } from "@/lib/supabase/server";
+
+export default async function IssuesPage() {
+	const supabase = await createClient();
+	const { data: statuses, error: statusesError } = await supabase.rpc("ensure_issue_statuses");
+	const [{ data: projects, error: projectsError }, { data: issues, error: issuesError }] = await Promise.all([
+		supabase.from("projects").select("*").order("name"),
+		supabase.from("issues").select("*").order("updated_at", { ascending: false }),
+	]);
+	return <IssuesWorkspace initialIssues={issues ?? []} projects={projects ?? []} statuses={statuses ?? []} loadError={projectsError?.message ?? issuesError?.message ?? statusesError?.message} />;
 }

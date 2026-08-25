@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FolderKanban, ListTodo, LogOut, UserRound } from "lucide-react";
+import { FolderKanban, ListTodo, LogOut, Settings, UserRound } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -22,6 +22,7 @@ import { createClient } from "@/lib/supabase/client";
 const navigation = [
 	{ href: "/projects", label: "Projects", icon: FolderKanban },
 	{ href: "/issues", label: "Issues", icon: ListTodo },
+	{ href: "/settings", label: "Settings", icon: Settings },
 ];
 
 type AppSidebarProps = {
