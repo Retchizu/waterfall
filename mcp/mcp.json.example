@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "waterfall": {
+      "command": "node",
+      "args": ["--env-file=mcp/.env", "--import", "tsx", "mcp/src/index.ts"],
+      "cwd": "/absolute/path/to/waterfall"
+    }
+  }
+}
