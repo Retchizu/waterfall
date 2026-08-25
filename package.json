@@ -12,5 +12,8 @@
     "db:reset": "npx supabase db reset",
     "db:push": "npx supabase db push",
     "db:new": "npx supabase migration new"
+  },
+  "devDependencies": {
+    "supabase": "^2.115.0"
   }
 }

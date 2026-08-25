@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
 	title: "Waterfall | Welcome",
 	description: "Log in or create your Waterfall account.",
+	icons: {
+		icon: "/waterfall.ico",
+	},
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
