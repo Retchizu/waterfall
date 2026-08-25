@@ -12,9 +12,11 @@
     "db:reset": "npx supabase db reset",
     "db:push": "npx supabase db push",
     "db:new": "npx supabase migration new",
+    "db:test": "npx supabase test db",
     "mcp:check": "biome check mcp/src",
     "mcp:format": "biome format --write mcp/src",
     "mcp:lint": "biome lint mcp/src",
+    "mcp:login": "node --env-file=mcp/.env --import tsx mcp/src/login.ts",
     "mcp:dev": "node --env-file=mcp/.env --import tsx mcp/src/index.ts",
     "mcp:test": "vitest run --config mcp/vitest.config.mts"
   },

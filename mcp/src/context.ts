@@ -1,17 +1,15 @@
-import { createClient } from "@supabase/supabase-js";
+import {
+	createSupabaseClient,
+	refreshSessionIfNeeded,
+	restoreAuthenticatedSession,
+} from "./auth-session";
 
-function requiredEnvironmentVariable(name: string): string {
-	const value = process.env[name];
-	if (!value) throw new Error(`Missing required environment variable: ${name}`);
-	return value;
+export const supabase = createSupabaseClient();
+
+export async function initializeAuthenticatedSession(): Promise<void> {
+	await restoreAuthenticatedSession(supabase);
 }
 
-export const supabase = createClient(
-	requiredEnvironmentVariable("SUPABASE_URL"),
-	requiredEnvironmentVariable("SUPABASE_ANON_KEY"),
-	{
-		auth: { autoRefreshToken: false, persistSession: false },
-		accessToken: async () =>
-			requiredEnvironmentVariable("SUPABASE_ACCESS_TOKEN"),
-	},
-);
+export async function ensureAuthenticatedSession(): Promise<void> {
+	await refreshSessionIfNeeded(supabase);
+}

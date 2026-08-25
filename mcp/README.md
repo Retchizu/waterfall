@@ -2,14 +2,20 @@
 
 ## Local setup
 
-1. Copy `.env.example` to `.env` and provide a Supabase URL, anon key, and an authenticated user's access token.
-2. Start the server from the repository root:
+1. Copy `.env.example` to `.env` and provide a Supabase URL and publishable (anon) key.
+2. Sign in once from an interactive terminal. This stores the Supabase session and refresh token in `mcp/.auth.json`, which is ignored by Git:
+
+   ```sh
+   pnpm mcp:login
+   ```
+
+3. Start the server from the repository root:
 
    ```sh
    pnpm mcp:dev
    ```
 
-The server uses stdio, so it must be launched by an MCP client rather than opened in a browser.
+The server uses stdio, so it must be launched by an MCP client rather than opened in a browser. It refreshes its stored session automatically when it is close to expiry. If the refresh token is revoked or expires, run `pnpm mcp:login` again.
 
 ## Client configuration
 
