@@ -19,6 +19,7 @@ import { deleteProjectTool } from "../src/tools/projects/delete_project";
 import { getProjectTool } from "../src/tools/projects/get_project";
 import { listProjectsTool } from "../src/tools/projects/list_projects";
 import { updateProjectTool } from "../src/tools/projects/update_project";
+import { listStatusesTool } from "../src/tools/statuses/list_statuses";
 
 describe("Waterfall MCP tools", () => {
 	it("forwards an optional status ID when creating an issue", async () => {
@@ -59,6 +60,7 @@ describe("Waterfall MCP tools", () => {
 			listIssuesTool,
 			getProjectTool,
 			listProjectsTool,
+			listStatusesTool,
 		]) {
 			expect(tool.annotations?.readOnlyHint).toBe(true);
 			expect(tool.annotations?.destructiveHint).toBe(false);
@@ -78,5 +80,19 @@ describe("Waterfall MCP tools", () => {
 			expect(tool.annotations?.readOnlyHint).toBe(false);
 			expect(tool.annotations?.destructiveHint).toBe(false);
 		}
+	});
+
+	it("lists status IDs with their fixed groups", async () => {
+		mocks.supabase.rpc.mockResolvedValue({
+			data: [{ id: "status-id", name: "Ready", group: "started", position: 0 }],
+			error: null,
+		});
+
+		const result = await listStatusesTool.handler();
+
+		expect(mocks.supabase.rpc).toHaveBeenCalledWith("ensure_issue_statuses");
+		expect(JSON.parse(result.content[0].text)).toEqual({
+			statuses: [{ id: "status-id", name: "Ready", group: "started", position: 0 }],
+		});
 	});
 });

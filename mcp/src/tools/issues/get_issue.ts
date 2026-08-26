@@ -17,7 +17,7 @@ export const getIssueTool = {
 		const { data, error } = await supabase
 			.from("issues")
 			.select(
-				"*, projects!inner(key,name), issue_statuses!inner(name, is_complete, position)",
+				"*, projects!inner(key,name), issue_statuses!inner(name, group, position)",
 			)
 			.eq("projects.key", project_key)
 			.eq("number", issue_number)

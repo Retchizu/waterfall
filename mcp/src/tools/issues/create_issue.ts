@@ -14,7 +14,7 @@ const createIssueInputSchema = z.object(inputSchema);
 type CreateIssueInput = z.infer<z.ZodObject<typeof inputSchema>>;
 
 export const createIssueTool = {
-	description: "Create an issue in a Waterfall project.",
+	description: "Create an issue in a Waterfall project. Use list_statuses to discover status IDs.",
 	inputSchema: createIssueInputSchema,
 	annotations: { destructiveHint: false, readOnlyHint: false },
 

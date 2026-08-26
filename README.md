@@ -96,7 +96,7 @@ The server exposes these tools:
 | Projects | `create_project`, `delete_project`, `get_project`, `list_projects`, `update_project` |
 | Issues | `create_issue`, `delete_issue`, `get_issue`, `list_issues`, `update_issue` |
 
-Issues are identified by a project key and number, for example `APP-12`. Issue priorities range from `0` to `3`; custom statuses are configured in the web app and passed to MCP tools by status ID.
+Issues are identified by a project key and number, for example `APP-12`. Issue priorities range from `0` to `3`; use the MCP `list_statuses` tool to discover custom status IDs and their Backlog, Started, Completed, or Cancelled group before passing a status ID to issue tools.
 
 ## Database
 

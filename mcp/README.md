@@ -17,6 +17,8 @@
 
 The server uses stdio, so it must be launched by an MCP client rather than opened in a browser. It refreshes its stored session automatically when it is close to expiry. If the refresh token is revoked or expires, run `pnpm mcp:login` again.
 
+Use `list_statuses` before creating or updating an issue to obtain the workspace's custom status IDs, labels, groups, and order.
+
 ## Client configuration
 
 Copy the `waterfall` entry from `mcp.json.example` into your MCP client's configuration, replacing `cwd` with this repository's absolute path. The command loads `mcp/.env` before starting the TypeScript server.

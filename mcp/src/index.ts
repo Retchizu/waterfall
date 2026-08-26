@@ -14,6 +14,7 @@ import { deleteProjectTool } from "./tools/projects/delete_project";
 import { getProjectTool } from "./tools/projects/get_project";
 import { listProjectsTool } from "./tools/projects/list_projects";
 import { updateProjectTool } from "./tools/projects/update_project";
+import { listStatusesTool } from "./tools/statuses/list_statuses";
 
 function createServer(): McpServer {
 	const server = new McpServer({ name: "waterfall", version: "1.0.0" });
@@ -37,6 +38,10 @@ function createServer(): McpServer {
 	server.registerTool("update_issue", updateIssueTool, async (args) => {
 		await ensureAuthenticatedSession();
 		return updateIssueTool.handler(args);
+	});
+	server.registerTool("list_statuses", listStatusesTool, async () => {
+		await ensureAuthenticatedSession();
+		return listStatusesTool.handler();
 	});
 	server.registerTool("create_project", createProjectTool, async (args) => {
 		await ensureAuthenticatedSession();

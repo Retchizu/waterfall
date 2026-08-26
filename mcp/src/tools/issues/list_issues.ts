@@ -29,7 +29,7 @@ export const listIssuesTool = {
 		let query = supabase
 			.from("issues")
 			.select(
-				"*, projects!inner(key, name), issue_statuses!inner(name, is_complete, position)",
+				"*, projects!inner(key, name), issue_statuses!inner(name, group, position)",
 				{ count: "exact" },
 			)
 			.order("updated_at", { ascending: false })

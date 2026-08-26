@@ -23,7 +23,7 @@ type UpdateIssueInput = z.infer<typeof updateIssueSchema>;
 
 export const updateIssueTool = {
 	description:
-		"Update a Waterfall issue identified by its project key and issue number.",
+		"Update a Waterfall issue identified by its project key and issue number. Use list_statuses to discover status IDs.",
 	inputSchema: updateIssueSchema,
 	annotations: { destructiveHint: false, readOnlyHint: false },
 

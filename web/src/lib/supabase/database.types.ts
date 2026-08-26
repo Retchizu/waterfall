@@ -12,8 +12,8 @@ export type Database = {
 			issue_statuses: {
 				Row: {
 					created_at: string;
+					group: StatusGroup;
 					id: string;
-					is_complete: boolean;
 					name: string;
 					position: number;
 					updated_at: string;
@@ -21,8 +21,8 @@ export type Database = {
 				};
 				Insert: {
 					created_at?: string;
+					group: StatusGroup;
 					id?: string;
-					is_complete?: boolean;
 					name: string;
 					position: number;
 					updated_at?: string;
@@ -30,8 +30,8 @@ export type Database = {
 				};
 				Update: {
 					created_at?: string;
+					group?: StatusGroup;
 					id?: string;
-					is_complete?: boolean;
 					name?: string;
 					position?: number;
 					updated_at?: string;
@@ -130,7 +130,7 @@ export type Database = {
 		Views: Record<string, never>;
 		Functions: {
 			add_issue_status: {
-				Args: { p_name: string };
+				Args: { p_group: StatusGroup; p_name: string };
 				Returns: Database["public"]["Tables"]["issue_statuses"]["Row"];
 			};
 			create_issue: {
@@ -152,16 +152,12 @@ export type Database = {
 				Returns: Database["public"]["Tables"]["issue_statuses"]["Row"][];
 			};
 			rename_issue_status: {
-				Args: { p_name: string; p_status_id: string };
+				Args: { p_group: StatusGroup; p_name: string; p_status_id: string };
 				Returns: Database["public"]["Tables"]["issue_statuses"]["Row"];
 			};
 			reorder_issue_statuses: {
-				Args: { p_status_ids: string[] };
+				Args: { p_group: StatusGroup; p_status_ids: string[] };
 				Returns: Database["public"]["Tables"]["issue_statuses"]["Row"][];
-			};
-			set_complete_issue_status: {
-				Args: { p_status_id: string };
-				Returns: Database["public"]["Tables"]["issue_statuses"]["Row"];
 			};
 			update_issue: {
 				Args: {
@@ -183,3 +179,4 @@ export type Database = {
 export type Project = Database["public"]["Tables"]["projects"]["Row"];
 export type Issue = Database["public"]["Tables"]["issues"]["Row"];
 export type IssueStatus = Database["public"]["Tables"]["issue_statuses"]["Row"];
+export type StatusGroup = "backlog" | "started" | "completed" | "cancelled";
