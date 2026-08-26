@@ -68,6 +68,16 @@ The MCP server uses the same Supabase project and authenticates as a Waterfall u
 - MCP client configuration
 - MCP validation commands
 
+#### Supabase Cloud
+
+When using a hosted Supabase project, set `mcp/.env` to the project's URL and publishable (anon) key from the Supabase Connect dialog. After creating a user in the web app, run the interactive login command from the repository root to save that user's Supabase session for the MCP server:
+
+```sh
+pnpm mcp:login
+```
+
+The MCP server will then use the saved Supabase Cloud credentials when started by your MCP client. If the session expires or is revoked, run `pnpm mcp:login` again.
+
 The short version is:
 
 ```sh
