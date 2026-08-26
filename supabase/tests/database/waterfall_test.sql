@@ -1,6 +1,6 @@
 begin;
 
-select plan(24);
+select plan(26);
 
 select has_table('public', 'projects', 'projects table exists');
 select has_table('public', 'issues', 'issues table exists');
@@ -88,6 +88,25 @@ where name = 'Completed issue';
 select ok(
   (select completed_at is null from public.issues where name = 'Completed issue'),
   'moving an issue out of completed clears its completion date'
+);
+select public.create_issue(
+  (select id from public.projects where key = 'OWNER'),
+  'Delete completed status',
+  null,
+  (select id from public.issue_statuses where user_id = auth.uid() and "group" = 'completed'),
+  1
+);
+select public.delete_issue_status(
+  (select id from public.issue_statuses where user_id = auth.uid() and "group" = 'completed'),
+  (select id from public.issue_statuses where user_id = auth.uid() and "group" = 'started')
+);
+select ok(
+  not exists (select 1 from public.issue_statuses where user_id = auth.uid() and "group" = 'completed'),
+  'a completed status can be deleted after status grouping'
+);
+select ok(
+  (select completed_at is null from public.issues where name = 'Delete completed status'),
+  'deleting a completed status applies the replacement completion semantics'
 );
 
 set local role postgres;
