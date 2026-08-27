@@ -174,7 +174,7 @@ select is(
   'an opened pull request creates an applied audit run'
 );
 
-select public.set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
 set local role authenticated;
 select public.set_issue_status_automation(
   (select id from public.issue_statuses where user_id = auth.uid() and name = 'Released'),
