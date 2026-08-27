@@ -113,6 +113,18 @@ pnpm db:test        # Run database tests
 
 Keep migrations forward-only. Do not commit `.env` files or the MCP session file at `mcp/.auth.json`.
 
+## GitHub App integration
+
+The GitHub branch and pull-request integration uses a GitHub App. Start from [`docs/github-app-manifest.json.example`](docs/github-app-manifest.json.example), replace its placeholder URLs, and configure GitHub to send its webhook to the deployed `github-webhook` Edge Function.
+
+Set these Supabase Edge Function secrets before deployment:
+
+```sh
+supabase secrets set GITHUB_WEBHOOK_SECRET=... GITHUB_APP_ID=... GITHUB_APP_PRIVATE_KEY="..."
+```
+
+Deploy both functions, then configure the web application with `NEXT_PUBLIC_GITHUB_APP_INSTALL_URL`, the GitHub App's installation URL. The webhook endpoint intentionally has JWT verification disabled; it verifies GitHub's HMAC signature against the unmodified request body before doing database work. Repository synchronization remains authenticated and uses the GitHub App private key only inside the `github-installation-sync` function.
+
 ## Validation
 
 Run the relevant checks before committing:

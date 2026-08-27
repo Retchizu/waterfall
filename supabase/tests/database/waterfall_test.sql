@@ -1,6 +1,6 @@
 begin;
 
-select plan(26);
+select plan(39);
 
 select has_table('public', 'projects', 'projects table exists');
 select has_table('public', 'issues', 'issues table exists');
@@ -9,6 +9,11 @@ select has_column('public', 'issues', 'status_id', 'issues use custom statuses')
 select col_is_pk('public', 'projects', 'id', 'projects have a primary key');
 select has_index('public', 'issues', 'issues_project_id_idx', 'issues are indexed by project');
 select has_column('public', 'issue_statuses', 'group', 'statuses have a fixed group');
+select has_table('public', 'github_installations', 'GitHub installations table exists');
+select has_table('public', 'github_repositories', 'GitHub repositories table exists');
+select has_table('public', 'github_issue_branches', 'GitHub branch links table exists');
+select has_table('public', 'github_webhook_deliveries', 'GitHub webhook deliveries table exists');
+select has_table('public', 'issue_automation_runs', 'automation audit runs table exists');
 -- pgTAP bundled with the Supabase test runner has no `rls_enabled()` helper.
 -- Assert PostgreSQL's catalog flag directly so this remains compatible with it.
 select ok(
@@ -125,6 +130,88 @@ select is(
   (select count(*) from public.issue_statuses where user_id = '22222222-2222-2222-2222-222222222222'::uuid),
   0::bigint,
   'users cannot read another user''s statuses'
+);
+
+select public.add_issue_status('Code Review', 'started');
+select public.add_issue_status('Released', 'completed');
+select is(
+  (select enabled from public.set_issue_status_automation(
+    (select id from public.issue_statuses where user_id = auth.uid() and name = 'Code Review'),
+    'pull_request_opened', true
+  )),
+  true,
+  'a started status can receive the opened PR automation'
+);
+
+set local role postgres;
+insert into public.github_installations (user_id, provider, github_installation_id, github_account_login, github_account_type)
+values ('11111111-1111-1111-1111-111111111111', 'github_app', '9001', 'owner', 'User');
+insert into public.github_repositories (installation_id, github_repository_id, owner_login, name, full_name)
+values ((select id from public.github_installations where github_installation_id = '9001'), '7001', 'owner', 'repo', 'owner/repo');
+
+select public.process_github_webhook(
+  'delivery-create', 'create',
+  jsonb_build_object('repository', jsonb_build_object('id', '7001'), 'ref_type', 'branch', 'ref', 'feat/OWNER-1-auth-page')
+);
+select is(
+  (select count(*) from public.github_issue_branches where branch_name = 'feat/OWNER-1-auth-page'),
+  1::bigint,
+  'a branch-created delivery stores one issue link'
+);
+
+select public.process_github_webhook(
+  'delivery-opened', 'pull_request',
+  jsonb_build_object('action', 'opened', 'repository', jsonb_build_object('id', '7001'), 'pull_request', jsonb_build_object('head', jsonb_build_object('ref', 'feat/OWNER-1-auth-page')))
+);
+select is(
+  (select status_id from public.issues where project_id = (select id from public.projects where key = 'OWNER') and number = 1),
+  (select id from public.issue_statuses where user_id = '11111111-1111-1111-1111-111111111111'::uuid and name = 'Code Review'),
+  'an opened pull request moves a linked issue to its configured status'
+);
+select is(
+  (select count(*) from public.issue_automation_runs where trigger = 'pull_request_opened' and outcome = 'applied'),
+  1::bigint,
+  'an opened pull request creates an applied audit run'
+);
+
+select public.set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
+set local role authenticated;
+select public.set_issue_status_automation(
+  (select id from public.issue_statuses where user_id = auth.uid() and name = 'Released'),
+  'pull_request_merged', true
+);
+set local role postgres;
+select public.process_github_webhook(
+  'delivery-merged', 'pull_request',
+  jsonb_build_object('action', 'closed', 'repository', jsonb_build_object('id', '7001'), 'pull_request', jsonb_build_object('merged', true, 'head', jsonb_build_object('ref', 'feat/OWNER-1-auth-page')))
+);
+select is(
+  (select status_id from public.issues where project_id = (select id from public.projects where key = 'OWNER') and number = 1),
+  (select id from public.issue_statuses where user_id = '11111111-1111-1111-1111-111111111111'::uuid and name = 'Released'),
+  'a merged pull request moves a linked issue to its configured completed status'
+);
+select ok(
+  (select completed_at is not null from public.issues where project_id = (select id from public.projects where key = 'OWNER') and number = 1),
+  'the existing issue-status trigger records completion for a merged pull request'
+);
+select public.process_github_webhook(
+  'delivery-merged', 'pull_request',
+  jsonb_build_object('action', 'closed', 'repository', jsonb_build_object('id', '7001'), 'pull_request', jsonb_build_object('merged', true, 'head', jsonb_build_object('ref', 'feat/OWNER-1-auth-page')))
+);
+select is(
+  (select count(*) from public.issue_automation_runs where trigger = 'pull_request_merged'),
+  1::bigint,
+  'a duplicate GitHub delivery does not run an automation twice'
+);
+update public.github_repositories set is_active = false where github_repository_id = '7001';
+select public.process_github_webhook(
+  'delivery-disabled-repository', 'create',
+  jsonb_build_object('repository', jsonb_build_object('id', '7001'), 'ref_type', 'branch', 'ref', 'feat/OWNER-2-auth-page')
+);
+select is(
+  (select outcome from public.github_webhook_deliveries where github_delivery_id = 'delivery-disabled-repository'),
+  'ignored',
+  'a delivery from a disabled repository is ignored'
 );
 
 select * from finish();

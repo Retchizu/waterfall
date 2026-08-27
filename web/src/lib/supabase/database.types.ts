@@ -9,6 +9,114 @@ export type Json =
 export type Database = {
 	public: {
 		Tables: {
+			github_installations: {
+				Row: {
+					created_at: string;
+					github_account_id: string | null;
+					github_account_login: string | null;
+					github_account_type: "User" | "Organization" | null;
+					github_installation_id: string | null;
+					id: string;
+					provider: "github_app" | "github_oauth";
+					status: "active" | "suspended" | "revoked" | "deleted";
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					github_account_id?: string | null;
+					github_account_login?: string | null;
+					github_account_type?: "User" | "Organization" | null;
+					github_installation_id?: string | null;
+					id?: string;
+					provider: "github_app" | "github_oauth";
+					status?: "active" | "suspended" | "revoked" | "deleted";
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					created_at?: string;
+					github_account_id?: string | null;
+					github_account_login?: string | null;
+					github_account_type?: "User" | "Organization" | null;
+					github_installation_id?: string | null;
+					id?: string;
+					provider?: "github_app" | "github_oauth";
+					status?: "active" | "suspended" | "revoked" | "deleted";
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [];
+			};
+			github_repositories: {
+				Row: {
+					created_at: string;
+					full_name: string;
+					github_repository_id: string;
+					id: string;
+					installation_id: string;
+					is_active: boolean;
+					last_successful_delivery_at: string | null;
+					name: string;
+					owner_login: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					full_name: string;
+					github_repository_id: string;
+					id?: string;
+					installation_id: string;
+					is_active?: boolean;
+					last_successful_delivery_at?: string | null;
+					name: string;
+					owner_login: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					full_name?: string;
+					github_repository_id?: string;
+					id?: string;
+					installation_id?: string;
+					is_active?: boolean;
+					last_successful_delivery_at?: string | null;
+					name?: string;
+					owner_login?: string;
+					updated_at?: string;
+				};
+				Relationships: [];
+			};
+			issue_status_automations: {
+				Row: {
+					created_at: string;
+					enabled: boolean;
+					id: string;
+					status_id: string;
+					trigger: AutomationTrigger;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					enabled?: boolean;
+					id?: string;
+					status_id: string;
+					trigger: AutomationTrigger;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					created_at?: string;
+					enabled?: boolean;
+					id?: string;
+					status_id?: string;
+					trigger?: AutomationTrigger;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [];
+			};
 			issue_statuses: {
 				Row: {
 					created_at: string;
@@ -129,6 +237,14 @@ export type Database = {
 		};
 		Views: Record<string, never>;
 		Functions: {
+			register_github_installation: {
+				Args: { p_github_installation_id: string };
+				Returns: Database["public"]["Tables"]["github_installations"]["Row"];
+			};
+			set_issue_status_automation: {
+				Args: { p_enabled?: boolean; p_status_id: string; p_trigger: AutomationTrigger };
+				Returns: Database["public"]["Tables"]["issue_status_automations"]["Row"];
+			};
 			add_issue_status: {
 				Args: { p_group: StatusGroup; p_name: string };
 				Returns: Database["public"]["Tables"]["issue_statuses"]["Row"];
@@ -180,3 +296,7 @@ export type Project = Database["public"]["Tables"]["projects"]["Row"];
 export type Issue = Database["public"]["Tables"]["issues"]["Row"];
 export type IssueStatus = Database["public"]["Tables"]["issue_statuses"]["Row"];
 export type StatusGroup = "backlog" | "started" | "completed" | "cancelled";
+export type AutomationTrigger = "pull_request_opened" | "pull_request_merged";
+export type IssueStatusAutomation = Database["public"]["Tables"]["issue_status_automations"]["Row"];
+export type GitHubInstallation = Database["public"]["Tables"]["github_installations"]["Row"];
+export type GitHubRepository = Database["public"]["Tables"]["github_repositories"]["Row"];

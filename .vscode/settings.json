@@ -1,4 +1,5 @@
 {
+	"deno.enablePaths": ["supabase/functions"],
 	"editor.formatOnSave": true,
 	"[typescript]": {
 		"editor.defaultFormatter": "biomejs.biome"

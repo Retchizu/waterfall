@@ -1,0 +1,22 @@
+{
+  "name": "Waterfall",
+  "description": "Link GitHub pull requests to Waterfall issues through branch names.",
+  "url": "https://YOUR-WATERFALL-APP.example",
+  "hook_attributes": {
+    "url": "https://YOUR-SUPABASE-PROJECT.supabase.co/functions/v1/github-webhook",
+    "active": true
+  },
+  "redirect_url": "https://YOUR-WATERFALL-APP.example/settings/github/callback",
+  "setup_url": "https://YOUR-WATERFALL-APP.example/settings/github/callback",
+  "public": false,
+  "default_permissions": {
+    "metadata": "read",
+    "pull_requests": "read"
+  },
+  "default_events": [
+    "create",
+    "pull_request",
+    "installation",
+    "installation_repositories"
+  ]
+}
