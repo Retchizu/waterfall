@@ -383,7 +383,7 @@ declare
   issue_row public.issues;
   current_status_group text;
   automation public.issue_status_automations;
-  branch_name text;
+  webhook_branch_name text;
   event_action text := nullif(p_payload ->> 'action', '');
   automation_trigger text;
   run_outcome text;
@@ -488,9 +488,9 @@ begin
     update public.github_webhook_deliveries set repository_id = repository.id where id = delivery.id;
 
     if p_event_name = 'create' and event_action is null and p_payload ->> 'ref_type' = 'branch' then
-      branch_name := p_payload ->> 'ref';
+      webhook_branch_name := p_payload ->> 'ref';
       select issue_id, reason into resolved_issue_id, resolution_reason
-      from public.resolve_github_branch_issue(installation.user_id, branch_name);
+      from public.resolve_github_branch_issue(installation.user_id, webhook_branch_name);
       if resolved_issue_id is null then
         update public.github_webhook_deliveries
         set processed_at = now(), outcome = 'ignored', reason = resolution_reason
@@ -500,7 +500,7 @@ begin
       end if;
 
       insert into public.github_issue_branches (repository_id, issue_id, branch_name, source)
-      values (repository.id, resolved_issue_id, branch_name, 'branch_created')
+      values (repository.id, resolved_issue_id, webhook_branch_name, 'branch_created')
       on conflict (repository_id, branch_name) do update
       set last_seen_at = now(), is_deleted = false;
       update public.github_webhook_deliveries
@@ -512,24 +512,27 @@ begin
 
     if p_event_name = 'pull_request'
        and (event_action = 'opened' or (event_action = 'closed' and coalesce((p_payload #>> '{pull_request,merged}')::boolean, false))) then
-      branch_name := p_payload #>> '{pull_request,head,ref}';
-      if nullif(branch_name, '') is null then
+      webhook_branch_name := p_payload #>> '{pull_request,head,ref}';
+      if nullif(webhook_branch_name, '') is null then
         update public.github_webhook_deliveries
         set processed_at = now(), outcome = 'ignored', reason = 'pull request has no head branch'
         where id = delivery.id;
         return jsonb_build_object('outcome', 'ignored', 'reason', 'pull request has no head branch');
       end if;
 
-      select * into branch_link from public.github_issue_branches
-      where repository_id = repository.id and branch_name = branch_name and not is_deleted;
+      select * into branch_link
+      from public.github_issue_branches issue_branch
+      where issue_branch.repository_id = repository.id
+        and issue_branch.branch_name = webhook_branch_name
+        and not issue_branch.is_deleted;
       if found then
         resolved_issue_id := branch_link.issue_id;
       else
         select issue_id, reason into resolved_issue_id, resolution_reason
-        from public.resolve_github_branch_issue(installation.user_id, branch_name);
+        from public.resolve_github_branch_issue(installation.user_id, webhook_branch_name);
         if resolved_issue_id is not null then
           insert into public.github_issue_branches (repository_id, issue_id, branch_name, source)
-          values (repository.id, resolved_issue_id, branch_name, 'pull_request')
+          values (repository.id, resolved_issue_id, webhook_branch_name, 'pull_request')
           on conflict (repository_id, branch_name) do update
           set last_seen_at = now(), is_deleted = false;
         end if;
