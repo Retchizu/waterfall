@@ -153,6 +153,9 @@ select public.process_github_webhook(
   'delivery-create', 'create',
   jsonb_build_object('repository', jsonb_build_object('id', '7001'), 'ref_type', 'branch', 'ref', 'feat/OWNER-1-auth-page')
 );
+select diag(coalesce((
+  select error from public.github_webhook_deliveries where github_delivery_id = 'delivery-create'
+), 'delivery-create did not record an error'));
 select is(
   (select count(*) from public.github_issue_branches where branch_name = 'feat/OWNER-1-auth-page'),
   1::bigint,
